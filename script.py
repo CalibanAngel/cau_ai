@@ -53,5 +53,5 @@ Resultcity.append(listCities[pos].lst[0] + 1)
 inputFile.close()
 for elem in Resultcity:
    outputFile.write(str(elem) + '\n')
-outputFile.write(str(time.time() - startTime))
 outputFile.close()
+print(str(time.time() - startTime))
