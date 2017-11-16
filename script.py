@@ -101,7 +101,7 @@ def randomCalc():
          best_dist = tmp_dist
          bestResultcity = tmpResultcity
 
-#   print("Distance opt = " + str(best_dist))
+   print("Distance opt = " + str(best_dist))
 #   print(bestResultcity)
    return bestResultcity
 
