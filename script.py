@@ -3,132 +3,110 @@
 import random
 import time
 import sys
+from threading import Thread
 
-class city:
-   lst = []
-   visited = 0
+g_timeDuration = 28
 
-listCities = []
-Resultcity = []
+class OtpAlgo(Thread):
 
-def allCitiesVisited(tab):
-   for elem in tab:
-      if (elem.visited == 0):
-         return False
-   return True
+   def __init__(self, id, startTime, listCities):
+      Thread.__init__(self)
+      self.id = id
+      self.distance = -1
+      self.resultCities = []
+      self.startTime = startTime
+      self.listCities = listCities
+      self.maxLen = len(listCities)
 
-
-def getMin(tab):
-   ret = -1
-   i = 0
-   saveIndex = 0
-   while i < len(tab):
-      if ((ret == -1 or tab[i] < ret) and listCities[i].visited == 0):
-         ret = tab[i]
-         saveIndex = i
-      i += 1
-   return saveIndex
-
-def loop():
-   pos = 0
-   distance = 0
-   closestCity = 0
-
-   while allCitiesVisited(listCities) != True:
-      listCities[pos].visited = 1
-      closestCity = getMin(listCities[pos].lst)
-      Resultcity.append(pos)
-      distance += listCities[pos].lst[closestCity]
-      pos = closestCity
-
-   distance += listCities[pos].lst[0]
-   Resultcity.append(listCities[pos].lst[0])
-   return distance
-
-def calcPathDistance(copyResultcity):
-   res = 0
-   for i in range(len(copyResultcity)):
-      if i + 1 < len(copyResultcity):
-         elem = copyResultcity[i]
-         res += listCities[elem].lst[ copyResultcity[i + 1] ]
-   return res
-
-def optCalc(copyResultcity):
-   loc = 0
-   while loc < 999:
-      before_dist = -1
-      loc2 = loc + 1
+   def calcPathDistance(self, copyResultcity):
       res = 0
+      for i in range(self.maxLen - 1):
+         res += self.listCities[ copyResultcity[i] ][ copyResultcity[i + 1] ]
+      return res
+   
+   def optCalc(self, copyResultcity):
+      loc = 0
+      while loc < self.maxLen - 1:
+         before_dist = -1
+         loc2 = loc + 1
+         res = 0
 
-      while loc2 < 1000:
-         after_dist = listCities[ copyResultcity[loc] ].lst[ copyResultcity[loc2] ]
+         while loc2 < self.maxLen:
+            after_dist = self.listCities[ copyResultcity[loc] ][ copyResultcity[loc2] ]
 
-         if before_dist == -1 or before_dist > after_dist:
-            res = loc2
-            before_dist = after_dist
+            if before_dist == -1 or before_dist > after_dist:
+               res = loc2
+               before_dist = after_dist
 
-         loc2 += 1
+            loc2 += 1
 
-      if res != 0:
-         tmp = copyResultcity[loc + 1]
-         copyResultcity[loc + 1] = copyResultcity[res]
-         copyResultcity[res] = tmp
+         if res != 0:
+            tmp = copyResultcity[loc + 1]
+            copyResultcity[loc + 1] = copyResultcity[res]
+            copyResultcity[res] = tmp
 
-      loc += 1
+         loc += 1
+      return copyResultcity
 
-   return copyResultcity
+   def run(self):   
+      while self.startTime + g_timeDuration > time.time():
+         randResultcity = []
+         randResultcity.append(0)
+         for i in range(1, 1000):
+            while 1:
+               randPos = random.randint(0, self.maxLen - 1)
+               if (randPos in randResultcity) == False:
+                  break
+            randResultcity.append(randPos)
+         randResultcity.append(0)
 
-def randomCalc():
-   maxLen = len(listCities)
-   best_dist = -1
-   bestResultcity = []
+         tmpResultcity = self.optCalc(randResultcity)
+         tmp_dist = self.calcPathDistance(tmpResultcity)
+         if tmp_dist < self.distance or self.distance == -1:
+            self.distance = tmp_dist
+            self.resultCities = tmpResultcity
 
-   start_time = time.time()
-   while start_time + 28 > time.time():
-      randResultcity = []
-      randResultcity.append(0)
-      for i in range(1, 1000):
-         while 1:
-            randPos = random.randint(0, maxLen - 1)
-            if (randPos in randResultcity) == False:
-               break
-         randResultcity.append(randPos)
-      randResultcity.append(0)
 
-      tmpResultcity = optCalc(randResultcity)
-      tmp_dist = calcPathDistance(tmpResultcity)
-      if tmp_dist < best_dist or best_dist == -1:
-         best_dist = tmp_dist
-         bestResultcity = tmpResultcity
-
-   print("Distance opt = " + str(best_dist))
-#   print(bestResultcity)
-   return bestResultcity
-
-def main(argv):
-   if len(argv) != 3:
-      sys.exit()
-   inputFile = open(argv[1], 'r')
-   outputFile = open(argv[2], 'w')
+def loadDataFromFile(fileName):
+   inputFile = open(fileName, 'r')
+   listCities = []
+   
    for line in inputFile:
-      tmp = city()
-      tmp.lst = list(map(int, line.split(",") ))
-      listCities.append(tmp)
-
+      listCities.append( list(map(int, line.split(","))))
    inputFile.close()
 
+   return listCities
+   
+def main(argv):
+   if len(argv) != 3:
+      print ("./script.py <input> <output>")
+      sys.exit()
+
+   listCities = loadDataFromFile(argv[1])
+
+   tabThread = []
    startTime = time.time()
-   res = loop()
 
-#   print("Distance Greedy = " + str(res))
-#   print(Resultcity)
+   for threadId in range(5):
+      tmpThread = OtpAlgo(threadId, startTime, listCities)
+      tmpThread.start()
+      tabThread.append( tmpThread )
 
-   Resultcity = randomCalc()
+   resultCities = []
+   best_dist = -1
+   for elem in tabThread:
+      elem.join()
+      if elem.distance < best_dist or best_dist == -1:
+         best_dist = elem.distance
+         resultCities = elem.resultCities
+      print("Thread: " + str(elem.id) + " => " + str(elem.distance))
 
-   for i in range(len(Resultcity)):
-      elem = Resultcity[i]
+   print ("Best = " + str(best_dist))
+   print (resultCities)
+
+   outputFile = open(argv[2], "w") 
+   for elem in resultCities:
       outputFile.write(str(elem + 1) + '\n')
-
    outputFile.close()
 
    print(str(time.time() - startTime))
