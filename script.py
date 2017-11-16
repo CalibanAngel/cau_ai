@@ -3,7 +3,6 @@
 import random
 import time
 import sys
-import copy
 
 class city:
    lst = []
@@ -54,43 +53,57 @@ def calcPathDistance(copyResultcity):
          res += listCities[elem].lst[ copyResultcity[i + 1] ]
    return res
 
-def optCalc():
-   bestResultcity = []
+def optCalc(copyResultcity):
+   loc = 0
+   while loc < 999:
+      before_dist = -1
+      loc2 = loc + 1
+      res = 0
+
+      while loc2 < 1000:
+         after_dist = listCities[ copyResultcity[loc] ].lst[ copyResultcity[loc2] ]
+
+         if before_dist == -1 or before_dist > after_dist:
+            res = loc2
+            before_dist = after_dist
+
+         loc2 += 1
+
+      if res != 0:
+         tmp = copyResultcity[loc + 1]
+         copyResultcity[loc + 1] = copyResultcity[res]
+         copyResultcity[res] = tmp
+
+      loc += 1
+
+   return copyResultcity
+
+def randomCalc():
+   maxLen = len(listCities)
    best_dist = -1
+   bestResultcity = []
 
-   for toc in range(1):
-      copyResultcity = copy.deepcopy(Resultcity)
-      loc = 0
+   start_time = time.time()
+   while start_time + 28 > time.time():
+      randResultcity = []
+      randResultcity.append(0)
+      for i in range(1, 1000):
+         while 1:
+            randPos = random.randint(0, maxLen - 1)
+            if (randPos in randResultcity) == False:
+               break
+         randResultcity.append(randPos)
+      randResultcity.append(0)
 
-      while loc < 999:
-         before_dist = -1
-         loc2 = 0
-         res = 0
-
-         while loc2 < 1000:
-            after_dist = listCities[ copyResultcity[loc] ].lst[ copyResultcity[loc2] ]
-
-            if before_dist == -1 or before_dist > after_dist:
-               res = loc2
-               before_dist = after_dist
-
-            loc2 += 1
-
-         if res != 0:
-            tmp = copyResultcity[loc + 1]
-            copyResultcity[loc + 1] = copyResultcity[res]
-            copyResultcity[res] = tmp
-
-         loc += 1
-
-      temp_dist = calcPathDistance(copyResultcity)
-      if temp_dist < best_dist or best_dist == -1:
-         best_dist = temp_dist
-         bestResultcity = copyResultcity
+      tmpResultcity = optCalc(randResultcity)
+      tmp_dist = calcPathDistance(tmpResultcity)
+      if tmp_dist < best_dist or best_dist == -1:
+         best_dist = tmp_dist
+         bestResultcity = tmpResultcity
 
 #   print("Distance opt = " + str(best_dist))
+#   print(bestResultcity)
    return bestResultcity
-
 
 def main(argv):
    if len(argv) != 3:
@@ -110,7 +123,7 @@ def main(argv):
 #   print("Distance Greedy = " + str(res))
 #   print(Resultcity)
 
-   Resultcity = optCalc()
+   Resultcity = randomCalc()
 
    for i in range(len(Resultcity)):
       elem = Resultcity[i]
