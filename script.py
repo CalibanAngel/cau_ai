@@ -87,7 +87,7 @@ def main(argv):
    tabThread = []
    startTime = time.time()
 
-   for threadId in range(5):
+   for threadId in range(8):
       tmpThread = OtpAlgo(threadId, startTime, listCities)
       tmpThread.start()
       tabThread.append( tmpThread )
@@ -102,7 +102,6 @@ def main(argv):
       print("Thread: " + str(elem.id) + " => " + str(elem.distance))
 
    print ("Best = " + str(best_dist))
-   print (resultCities)
 
    outputFile = open(argv[2], "w") 
    for elem in resultCities:
