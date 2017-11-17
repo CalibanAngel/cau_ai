@@ -82,6 +82,7 @@ class Tour:
     def getDistance(self):
         if self.distance == 0:
             tourDistance = 0
+            tmp = []
             for cityIndex in range(0, self.tourSize()):
                 fromCity = self.getCity(cityIndex)
                 destinationCity = None
@@ -89,6 +90,7 @@ class Tour:
                     destinationCity = self.getCity(cityIndex + 1)
                 else:
                     destinationCity = self.getCity(0)
+                tmp.append(destinationCity)
                 tourDistance += fromCity.getDistance(destinationCity.getName())
             self.distance = tourDistance
         return self.distance
@@ -224,7 +226,7 @@ if __name__ == '__main__':
     startTime = time.time()
 
     # Initialize population
-    pop = Population(tourmanager, 50, True)
+    pop = Population(tourmanager, 5000, True)
     print("Initial distance: " + str(pop.getFittest().getDistance()))
 
     # Evolve population for 50 generations
