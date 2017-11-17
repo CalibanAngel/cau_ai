@@ -5,7 +5,7 @@ import time
 import sys
 from threading import Thread
 
-g_timeDuration = 28
+g_timeDuration = 0
 
 class OtpAlgo(Thread):
 
@@ -23,7 +23,7 @@ class OtpAlgo(Thread):
       for i in range(self.maxLen - 1):
          res += self.listCities[ copyResultcity[i] ][ copyResultcity[i + 1] ]
       return res
-   
+
    def optCalc(self, copyResultcity):
       loc = 0
       while loc < self.maxLen - 1:
@@ -48,17 +48,12 @@ class OtpAlgo(Thread):
          loc += 1
       return copyResultcity
 
-   def run(self):   
+   def run(self):
       while self.startTime + g_timeDuration > time.time():
-         randResultcity = []
+         randResultcity = list(range(1,1000))
+         random.shuffle(randResultcity)
          randResultcity.append(0)
-         for i in range(1, 1000):
-            while 1:
-               randPos = random.randint(0, self.maxLen - 1)
-               if (randPos in randResultcity) == False:
-                  break
-            randResultcity.append(randPos)
-         randResultcity.append(0)
+         randResultcity.insert(0,0)
 
          tmpResultcity = self.optCalc(randResultcity)
          tmp_dist = self.calcPathDistance(tmpResultcity)
@@ -70,20 +65,21 @@ class OtpAlgo(Thread):
 def loadDataFromFile(fileName):
    inputFile = open(fileName, 'r')
    listCities = []
-   
+
    for line in inputFile:
       listCities.append( list(map(int, line.split(","))))
    inputFile.close()
 
    return listCities
-   
+
 def main(argv):
-   if len(argv) != 3:
+   if len(argv) != 4:
       print ("./script.py <input> <output>")
       sys.exit()
 
+   global g_timeDuration
    listCities = loadDataFromFile(argv[1])
-
+   g_timeDuration = int(argv[3])
    tabThread = []
    startTime = time.time()
 
@@ -99,11 +95,10 @@ def main(argv):
       if elem.distance < best_dist or best_dist == -1:
          best_dist = elem.distance
          resultCities = elem.resultCities
-      print("Thread: " + str(elem.id) + " => " + str(elem.distance))
 
    print ("Best = " + str(best_dist))
 
-   outputFile = open(argv[2], "w") 
+   outputFile = open(argv[2], "w")
    for elem in resultCities:
       outputFile.write(str(elem + 1) + '\n')
    outputFile.close()
