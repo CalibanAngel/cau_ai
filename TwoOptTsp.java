@@ -42,7 +42,7 @@ public class TwoOptTsp {
             before_dist = -1;
             res = 0;
 
-            for (int j = i + 1; j < cityNb; i++) {
+            for (int j = i + 1; j < cityNb; j++) {
                 int after_dist = graph[ tour.get(i) ][ tour.get(j) ];
 
                 if (before_dist > after_dist || before_dist == -1) {
@@ -126,7 +126,7 @@ public class TwoOptTsp {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("HELP: java TwoOptTsp <fileName>");
+            System.err.println("HELP: java TwoOptTsp <inputFileName> [outputFileName]");
             return;
         }
 
@@ -135,12 +135,17 @@ public class TwoOptTsp {
         try {
             int[][] graph = loadData(args[0]);
 
+            String outputFileName = "out.txt";
+            if (args.length == 2) {
+                outputFileName = args[1];
+            }
+
             TwoOptTsp tsp = new TwoOptTsp(0, graph, startTime);
             tsp.run(28000);
 
             System.out.println("Best tour length: " + tsp.bestPathLength);
 
-            PrintWriter writer = new PrintWriter("out.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter(outputFileName, "UTF-8");
             for (int i : tsp.bestTour)
                 writer.println(i + 1);
             writer.close();
