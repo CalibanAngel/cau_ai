@@ -34,11 +34,31 @@ public class ThreeOptTsp {
         return length;
     }
 
+    private void greedy() {
+        int res;
+
+        for (int i = 0; i < totalLen - 1; i++) {
+            res = -1;
+
+            for (int j = i + 1; j < totalLen; j++) {
+                if (res == -1 || graph[ tour.get(i) ][ tour.get(j) ] < res) {
+                    res = graph[ tour.get(i) ][ tour.get(j) ];
+                }
+            }
+
+            if (res != -1) {
+                int tmp = tour.get(i + 1);
+                tour.set(i + 1, tour.get(res));
+                tour.set(res, tmp);
+            }
+        }
+    }
+
     private void calcOpt() {
         int before_dist;
         int res, res2;
 
-        for (int loc = 0; loc < totalLen - 1; loc++) {
+        for (int loc = 0; loc < totalLen - 1; loc += 2) {
             before_dist = -1;
             res = 0;
             res2 = 0;
@@ -54,14 +74,15 @@ public class ThreeOptTsp {
                         before_dist = after_dist;
                     }
                 }
-
             }
 
-            if (res != 0 && res2 != 0) {
+            if (res != 0) {
                 int tmp = tour.get(loc + 1);
                 tour.set(loc + 1, tour.get(res));
                 tour.set(res, tmp);
+            }
 
+            if (res2 != 0) {
                 int tmp2 = tour.get(loc + 2);
                 tour.set(loc + 2, tour.get(res2));
                 tour.set(res2, tmp2);
@@ -84,6 +105,7 @@ public class ThreeOptTsp {
             Collections.shuffle(tour);
             tour.add(0, 0);
             tour.add(0);
+            greedy();
 
             calcOpt();
             int len = tourLength();
@@ -96,7 +118,7 @@ public class ThreeOptTsp {
         }
     }
 
-    public static int[][] loadData(String path) throws IOException {
+    private static int[][] loadData(String path) throws IOException {
         FileReader fr = new FileReader(path);
         BufferedReader buf = new BufferedReader(fr);
         String line;

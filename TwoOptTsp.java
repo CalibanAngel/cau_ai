@@ -11,24 +11,24 @@ public class TwoOptTsp {
     private int id;
     private long startTime;
 
-    private int totalLen = 0;
+    private int cityNb = 0;
     private int[][] graph;
 
     private ArrayList<Integer> tour = null;
 
-    public int bestTourLength = -1;
+    public int bestPathLength = -1;
     public ArrayList<Integer> bestTour;
 
     public TwoOptTsp(int _id, int[][] _graph, long _startTime) {
         id = _id;
         graph = _graph;
         startTime = _startTime;
-        totalLen = graph.length;
+        cityNb = graph.length;
     }
 
-    public int tourLength() {
+    public int pathLenght() {
         int length = 0;
-        for (int i = 0; i < totalLen - 1; i++) {
+        for (int i = 0; i < cityNb - 1; i++) {
             length += graph[ tour.get(i) ][ tour.get(i + 1) ];
         }
         return length;
@@ -38,55 +38,59 @@ public class TwoOptTsp {
         int before_dist;
         int res;
 
-        for (int loc = 0; loc < totalLen - 1; loc++) {
+        for (int i = 0; i < cityNb - 1; i++) {
             before_dist = -1;
             res = 0;
 
-            for (int loc2 = loc + 1; loc2 < totalLen; loc2++) {
-                int after_dist = graph[ tour.get(loc) ][ tour.get(loc2) ];
+            for (int j = i + 1; j < cityNb; i++) {
+                int after_dist = graph[ tour.get(i) ][ tour.get(j) ];
 
                 if (before_dist > after_dist || before_dist == -1) {
-                    res = loc2;
+                    res = j;
                     before_dist = after_dist;
                 }
             }
 
             if (res != 0) {
-                int tmp = tour.get(loc + 1);
-                tour.set(loc + 1, tour.get(res));
+                int tmp = tour.get(i + 1);
+                tour.set(i + 1, tour.get(res));
                 tour.set(res, tmp);
             }
         }
     }
 
+    private void initTour() {
+        tour.clear();
+        for (int i = 1; i < cityNb; i++)
+            tour.add(i);
+        Collections.shuffle(tour);
+        tour.add(0, 0);
+        tour.add(0);
+    }
 
     public void run(long maxDuration) {
         tour = new ArrayList<Integer>();
         bestTour = new ArrayList<Integer>();
 
-        for (int i = 0; i < totalLen + 1; i++)
+        for (int i = 0; i < cityNb + 1; i++)
             bestTour.add(0);
 
         while (startTime + maxDuration > System.currentTimeMillis()) {
-            tour.clear();
-            for (int i = 1; i < totalLen; i++)
-                tour.add(i);
-            Collections.shuffle(tour);
-            tour.add(0, 0);
-            tour.add(0);
+            initTour();
 
             calcOpt();
-            int len = tourLength();
-            if (len < bestTourLength || bestTourLength == -1) {
-                bestTourLength = len;
-                for (int i = 0; i < totalLen; i++) {
+            
+            int len = pathLenght();
+            if (len < bestPathLength || bestPathLength == -1) {
+                bestPathLength = len;
+                for (int i = 0; i < cityNb; i++) {
                     bestTour.set(i, tour.get(i));
                 }
             }
         }
     }
 
-    public static int[][] loadData(String path) throws IOException {
+    private static int[][] loadData(String path) throws IOException {
         FileReader fr = new FileReader(path);
         BufferedReader buf = new BufferedReader(fr);
         String line;
@@ -134,7 +138,7 @@ public class TwoOptTsp {
             TwoOptTsp tsp = new TwoOptTsp(0, graph, startTime);
             tsp.run(28000);
 
-            System.out.println("Best tour length: " + tsp.bestTourLength);
+            System.out.println("Best tour length: " + tsp.bestPathLength);
 
             PrintWriter writer = new PrintWriter("out.txt", "UTF-8");
             for (int i : tsp.bestTour)
