@@ -3,9 +3,14 @@
 import random
 import time
 import sys
+import math
 from threading import Thread
 
 g_timeDuration = 0
+
+class city:
+   distances = []
+   neighbours = []
 
 class OtpAlgo(Thread):
 
@@ -21,29 +26,37 @@ class OtpAlgo(Thread):
    def calcPathDistance(self, copyResultcity):
       res = 0
       for i in range(self.maxLen - 1):
-         res += self.listCities[ copyResultcity[i] ][ copyResultcity[i + 1] ]
+         res += self.listCities[ copyResultcity[i] ].distances[ copyResultcity[i + 1] ]
       return res
 
    def optCalc(self, copyResultcity):
       loc = 0
+      tabooValues = []
+      tabooValues.append(0)
       while loc < self.maxLen - 1:
-         before_dist = -1
-         loc2 = loc + 1
-         res = 0
+         before_dist = math.inf
+         loc2 = 0
+         res = -1
 
-         while loc2 < self.maxLen:
-            after_dist = self.listCities[ copyResultcity[loc] ][ copyResultcity[loc2] ]
+         currentCity = self.listCities[ copyResultcity[loc] ]
 
-            if before_dist == -1 or before_dist > after_dist:
+         while loc2 < 400:
+
+            after_dist = currentCity.distances[ currentCity.neighbours[ loc2 ] ]
+            if before_dist > after_dist and (currentCity.neighbours[ loc2 ] in tabooValues) == False:
                res = loc2
                before_dist = after_dist
 
             loc2 += 1
 
-         if res != 0:
-            tmp = copyResultcity[loc + 1]
-            copyResultcity[loc + 1] = copyResultcity[res]
-            copyResultcity[res] = tmp
+         if res != -1:
+            tabooValues.append(currentCity.neighbours[ res ])
+            pos = copyResultcity.index(currentCity.neighbours[ res ])
+            value = copyResultcity[loc + 1]
+            copyResultcity[loc + 1] = currentCity.neighbours[ res ]
+
+            copyResultcity[ pos ] = value
+
 
          loc += 1
       return copyResultcity
@@ -61,13 +74,31 @@ class OtpAlgo(Thread):
             self.distance = tmp_dist
             self.resultCities = tmpResultcity
 
+def getClosest(tab, lim):
+   tabResult = []
+   while (lim + 1) != 0:
+      index = 0
+      minValue = math.inf
+      saveIndex = index
+      while index < 1000:
+         if (tab[index] < minValue and (index in tabResult) == False):
+            minValue = tab[index]
+            saveIndex = index
+         index += 1
+      tabResult.append(saveIndex)
+      lim -= 1
+   tabResult.pop(0)
+   return tabResult
 
 def loadDataFromFile(fileName):
    inputFile = open(fileName, 'r')
    listCities = []
 
    for line in inputFile:
-      listCities.append( list(map(int, line.split(","))))
+      tmp = city()
+      tmp.distances = list(map(int, line.split(",")))
+      tmp.neighbours = getClosest(tmp.distances, 400)
+      listCities.append(tmp)
    inputFile.close()
 
    return listCities
@@ -79,6 +110,8 @@ def main(argv):
 
    global g_timeDuration
    listCities = loadDataFromFile(argv[1])
+   #for elem in listCities[0].neighbours:
+   #   print(elem)
    g_timeDuration = int(argv[3])
    tabThread = []
    startTime = time.time()
