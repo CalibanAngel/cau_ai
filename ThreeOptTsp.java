@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.io.PrintWriter;
 
-public class OptTsp {
+public class ThreeOptTsp {
     private int id;
     private long startTime;
 
@@ -19,7 +19,7 @@ public class OptTsp {
     public int bestTourLength = -1;
     public ArrayList<Integer> bestTour;
 
-    public OptTsp(int _id, int[][] _graph, long _startTime) {
+    public ThreeOptTsp(int _id, int[][] _graph, long _startTime) {
         id = _id;
         graph = _graph;
         startTime = _startTime;
@@ -132,7 +132,7 @@ public class OptTsp {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("HELP: java OptTsp <fileName>");
+            System.err.println("HELP: java ThreeOptTsp <fileName>");
             return;
         }
 
@@ -141,7 +141,7 @@ public class OptTsp {
         try {
             int[][] graph = loadData(args[0]);
 
-            OptTsp tsp = new OptTsp(0, graph, startTime);
+            ThreeOptTsp tsp = new ThreeOptTsp(0, graph, startTime);
             tsp.run(28000);
 
             System.out.println("Best tour length: " + tsp.bestTourLength);
