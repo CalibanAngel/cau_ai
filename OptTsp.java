@@ -35,28 +35,37 @@ public class OptTsp {
     }
 
     private void calcOpt() {
-        int loc = 0;
-        while (loc < totalLen - 1) {
-            int before_dist = -1;
-            int loc2 = loc + 1;
-            int res = 0;
+        int before_dist;
+        int res, res2;
 
-            while (loc2 < totalLen) {
-                int after_dist = graph[ tour.get(loc) ][ tour.get(loc2) ];
+        for (int loc = 0; loc < totalLen - 1; loc++) {
+            before_dist = -1;
+            res = 0;
+            res2 = 0;
 
-                if (before_dist > after_dist || before_dist == -1) {
-                    res = loc2;
-                    before_dist = after_dist;
+            for (int loc2 = loc + 1; loc2 < totalLen; loc2++) {
+
+                for (int loc3 = loc2 + 1; loc3 < totalLen; loc3++) {
+                    int after_dist = graph[ tour.get(loc) ][ tour.get(loc2) ] + graph[ tour.get(loc2) ][ tour.get(loc3) ];
+
+                    if (before_dist > after_dist || before_dist == -1) {
+                        res = loc2;
+                        res2 = loc3;
+                        before_dist = after_dist;
+                    }
                 }
-                loc2 += 1;
+
             }
 
-            if (res != 0) {
+            if (res != 0 && res2 != 0) {
                 int tmp = tour.get(loc + 1);
                 tour.set(loc + 1, tour.get(res));
                 tour.set(res, tmp);
+
+                int tmp2 = tour.get(loc + 2);
+                tour.set(loc + 2, tour.get(res2));
+                tour.set(res2, tmp2);
             }
-            loc += 1;
         }
     }
 
@@ -64,6 +73,7 @@ public class OptTsp {
     public void run(long maxDuration) {
         tour = new ArrayList<Integer>();
         bestTour = new ArrayList<Integer>();
+
         for (int i = 0; i < totalLen + 1; i++)
             bestTour.add(0);
 
@@ -91,6 +101,7 @@ public class OptTsp {
         BufferedReader buf = new BufferedReader(fr);
         String line;
         int i = 0;
+        int j;
 
         int[][] graph = new int[1000][1000];
 
@@ -101,7 +112,7 @@ public class OptTsp {
                 if (!s.isEmpty())
                     split.add(s);
 
-            int j = 0;
+            j = 0;
 
             for (String s : split)
                 if (!s.isEmpty())
@@ -121,7 +132,7 @@ public class OptTsp {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("java OptTsp <input>");
+            System.err.println("HELP: java OptTsp <fileName>");
             return;
         }
 
