@@ -61,8 +61,12 @@ public class TwoOptTsp {
 
     private void initTour() {
         tour.clear();
-        for (int i = 1; i < cityNb; i++)
+        bestTour.add(0);
+        bestTour.add(0);
+        for (int i = 1; i < cityNb; i++) {
+            bestTour.add(0);
             tour.add(i);
+        }
         Collections.shuffle(tour);
         tour.add(0, 0);
         tour.add(0);
@@ -71,9 +75,6 @@ public class TwoOptTsp {
     public void run(long maxDuration) {
         tour = new ArrayList<Integer>();
         bestTour = new ArrayList<Integer>();
-
-        for (int i = 0; i < cityNb + 1; i++)
-            bestTour.add(0);
 
         while (startTime + maxDuration > System.currentTimeMillis()) {
             initTour();
